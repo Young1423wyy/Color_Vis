@@ -1,4 +1,4 @@
-# Color_Vis
+<img width="2549" height="1403" alt="1-1" src="https://github.com/user-attachments/assets/4bc7d371-12d5-4835-a00c-5947eb8e6045" /># Color_Vis
 Data Visualization assignment 01
 # 图片颜色聚类可视化分析系统说明文档
 
@@ -77,11 +77,10 @@ pip install Flask scikit-learn numpy pillow scikit-image requests -i https://pyp
 
 3. 当终端显示 `* Running on http://127.0.0.1:8000` 时，在浏览器打开该地址即可。
 
-   ![1-1](\HW01_Color_Vis\samples\1-1.png)
+<img width="2549" height="1403" alt="1-1" src="https://github.com/user-attachments/assets/b20ac2ae-76ca-4074-a8bc-c06bf1f267e9" />
+<img width="2546" height="1353" alt="1-2" src="https://github.com/user-attachments/assets/0617a2c0-0a10-46ef-86c4-cd02946c35bb" />
+<img width="2178" height="1131" alt="1" src="https://github.com/user-attachments/assets/f32cec8e-6537-499a-a87b-c414a319c6bd" />
 
-   ![1-2](\HW01_Color_Vis\samples\1-2.png)
-   
-   ![1](\HW01_Color_Vis\samples\1.png)
 
 
 
