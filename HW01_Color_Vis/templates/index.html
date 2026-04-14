@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>图片颜色聚类可视化</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        body { font-family: 'Microsoft YaHei', sans-serif; margin: 20px; }
+        .control-panel { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; background: #f9f9f9; }
+        .control-panel select, .control-panel input { margin-right: 15px; padding: 5px; }
+        #main-chart { width: 100%; height: 500px; margin-top: 20px; }
+        .flex-container { display: flex; gap: 20px; }
+        #image-preview { max-width: 300px; max-height: 300px; object-fit: contain; }
+    </style>
+</head>
+<body>
+
+    <h1>图片像素颜色可视化</h1>
+
+    <div class="control-panel">
+        <label>选择图片:</label>
+        <select id="image-select">
+            {% for img in images %}
+            <option value="{{ img }}">{{ img }}</option>
+            {% endfor %}
+        </select>
+
+        <label>聚类数目 (K):</label>
+        <input type="number" id="k-value" value="5" min="2" max="100" style="width: 60px;">
+
+        <label>颜色空间:</label>
+        <select id="color-space">
+            <option value="RGB">RGB</option>
+            <option value="LAB">LAB</option>
+        </select>
+
+        <label>图表样式:</label>
+        <select id="chart-type">
+            <option value="pie">饼图</option>
+            <option value="bar">柱状图</option>
+        </select>
+
+        <button id="run-btn" class="ui-button ui-widget ui-corner-all">运行聚类</button>
+        <button id="ai-btn" class="ui-button ui-widget ui-corner-all" style="display:none; margin-left: 10px;">AI和谐度评估</button>
+    </div>
+
+    <div class="flex-container">
+        <div>
+            <h3>原始图片预览</h3>
+            <img id="image-preview" src="" alt="请选择图片">
+        </div>
+        <div style="flex-grow: 1;">
+            <div id="main-chart"></div>
+        </div>
+    </div>
+
+    <div id="ai-dialog" title="AI 色彩评估报告">
+        <p id="ai-result">正在请求AI大模型...</p>
+    </div>
+
+    <script>
+        let chartInstance = null;
+        let currentColors = [];
+
+        $(document).ready(function() {
+            // 初始化 jQuery UI
+            $("button").button();
+            $("#ai-dialog").dialog({ autoOpen: false, width: 400 });
+
+            // 图片预览逻辑
+            function updatePreview() {
+                let img = $("#image-select").val();
+                if(img) {
+                    $("#image-preview").attr("src", "/static/images/" + img);
+                }
+            }
+            $("#image-select").change(updatePreview);
+            updatePreview(); // 初始加载
+
+            // 初始化 ECharts
+            chartInstance = echarts.init(document.getElementById('main-chart'));
+
+            // 运行聚类按钮事件
+            $("#run-btn").click(function() {
+                let k = $("#k-value").val();
+                if(k < 5) alert("基本要求 K>=5，不过你想用就给你试试~");
+                
+                let reqData = {
+                    image: $("#image-select").val(),
+                    k: k,
+                    color_space: $("#color-space").val()
+                };
+
+                // 显示 loading
+                chartInstance.showLoading();
+
+                $.ajax({
+                    url: '/cluster',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(reqData),
+                    success: function(res) {
+                        chartInstance.hideLoading();
+                        if(res.status === 'success') {
+                            renderChart(res.data);
+                            // 保存当前颜色供 AI 使用并显示AI按钮
+                            currentColors = res.data.map(item => item.color);
+                            $("#ai-btn").show();
+                        }
+                    }
+                });
+            });
+
+            // 切换图表类型事件
+            $("#chart-type").change(function() {
+                if(currentColors.length > 0) {
+                    // 重新渲染现有数据
+                    $("#run-btn").click(); 
+                }
+            });
+
+            // AI和谐度评估按钮事件
+            $("#ai-btn").click(function() {
+                $("#ai-dialog").dialog("open");
+                $("#ai-result").text("正在向大语言模型请求评估，请稍候...");
+
+                $.ajax({
+                    url: '/check_harmony',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({colors: currentColors}),
+                    success: function(res) {
+                        if(res.status === 'success') {
+                            $("#ai-result").text(res.message);
+                        } else {
+                            $("#ai-result").text("调用失败: " + res.message);
+                        }
+                    }
+                });
+            });
+        });
+
+        function renderChart(data) {
+            let chartType = $("#chart-type").val();
+            let option = {};
+
+            // 准备数据
+            let chartData = data.map(item => ({
+                value: item.count,
+                name: item.color,
+                itemStyle: { color: item.color }
+            }));
+
+            if (chartType === 'pie') {
+                option = {
+                    title: { text: '聚类颜色占比 (饼图)', left: 'center' },
+                    tooltip: { trigger: 'item' },
+                    series: [{
+                        type: 'pie',
+                        radius: '60%',
+                        data: chartData,
+                        label: { show: true, formatter: '{b} \n ({d}%)' }
+                    }]
+                };
+            } else if (chartType === 'bar') {
+                option = {
+                    title: { text: '聚类颜色分布 (柱状图)', left: 'center' },
+                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                    xAxis: { 
+                        type: 'category', 
+                        data: data.map(item => item.color),
+                        axisLabel: { rotate: 45 }
+                    },
+                    yAxis: { type: 'value', name: '像素数量' },
+                    series: [{
+                        data: chartData,
+                        type: 'bar'
+                    }]
+                };
+            }
+
+            // 使用 true 清除旧配置再渲染新图表
+            chartInstance.setOption(option, true);
+        }
+    </script>
+</body>
+</html>
