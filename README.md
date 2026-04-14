@@ -77,9 +77,11 @@ pip install Flask scikit-learn numpy pillow scikit-image requests -i https://pyp
 
 3. 当终端显示 `* Running on http://127.0.0.1:8000` 时，在浏览器打开该地址即可。
 
-   ![1-1](D:\Desktop\ECNU\大二下\数据可视化\大作业1\HW01_Color_Vis\samples\1-1.png)
+   ![1-1](\HW01_Color_Vis\samples\1-1.png)
 
-   ![1-2](D:\Desktop\ECNU\大二下\数据可视化\大作业1\HW01_Color_Vis\samples\1-2.png)![](D:\Desktop\ECNU\大二下\数据可视化\大作业1\HW01_Color_Vis\samples\1.png)
+   ![1-2](\HW01_Color_Vis\samples\1-2.png)
+   
+   ![1](\HW01_Color_Vis\samples\1.png)
 
 
 
