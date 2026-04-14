@@ -1,4 +1,3 @@
-<img width="2549" height="1403" alt="1-1" src="https://github.com/user-attachments/assets/4bc7d371-12d5-4835-a00c-5947eb8e6045" /># Color_Vis
 Data Visualization assignment 01
 # 图片颜色聚类可视化分析系统说明文档
 
