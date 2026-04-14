@@ -87,6 +87,6 @@ pip install Flask scikit-learn numpy pillow scikit-image requests -i https://pyp
 
 **姓名**：吴昱阳
 
-**学号：**10245102418
+**学号**10245102418
 
 **日期**：2026年4月14日
